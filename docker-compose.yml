@@ -1,32 +1,5 @@
 services:
 
-  db:
-    build: ./db/
-    env_file:
-      - .env
-    volumes:
-      - vol1:/var/lib/mysql/
-    networks:
-      - dbnet
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  app:
-    build: ./app/
-    volumes:
-      - ./app/code:/var/www/html
-    networks:
-      - webnet
-      - dbnet
-    depends_on:
-      db:
-        condition: service_healthy
-    env_file:
-      - .env
-
   web:
     image: nginx:alpine
     ports:
@@ -38,6 +11,33 @@ services:
       - webnet
     depends_on:
       - app
+
+  app:
+    image: YOUR_DOCKERHUB_USERNAME/my-blog-app:latest
+    volumes:
+      - ./app/code:/var/www/html
+    networks:
+      - webnet
+      - dbnet
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+
+  db:
+    image: YOUR_DOCKERHUB_USERNAME/my-blog-db:latest
+    env_file:
+      - .env
+    volumes:
+      - vol1:/var/lib/mysql
+    networks:
+      - dbnet
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   webnet:

@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -13,14 +16,51 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4.2.2
 
-      - name: Deploy to server via SSH
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push app image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./app
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-blog-app:latest
+
+      - name: Build and push db image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./db
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/my-blog-db:latest
+
+      - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: MYSQL_ROOT_PASSWORD,MYSQL_PASSWORD
           script: |
+            if [ ! -d ~/my-blog ]; then
+              git clone https://github.com/nerkarpooja/my-blog-github-actions.git ~/my-blog
+            else
+              cd ~/my-blog && git pull origin main
+            fi
+
+            if [ ! -f ~/my-blog/.env ]; then
+              cat > ~/my-blog/.env << ENVEOF
+            MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE=blog
+            MYSQL_USER=bloguser
+            MYSQL_PASSWORD=${MYSQL_PASSWORD}
+            MYSQL_HOST=db
+            ENVEOF
+            fi
+
             cd ~/my-blog
-            git pull origin main
-            docker compose up --build -d
+            docker compose pull
+            docker compose up -d
             docker compose ps
