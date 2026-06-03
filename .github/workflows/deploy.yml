@@ -42,7 +42,6 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: MYSQL_ROOT_PASSWORD,MYSQL_PASSWORD
           script: |
             if [ ! -d ~/my-blog ]; then
               git clone https://github.com/nerkarpooja/my-blog-github-actions.git ~/my-blog
@@ -50,13 +49,16 @@ jobs:
               cd ~/my-blog && git pull origin main
             fi
 
-            echo "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}" > ~/my-blog/.env
-            echo "MYSQL_DATABASE=blog" >> ~/my-blog/.env
-            echo "MYSQL_USER=bloguser" >> ~/my-blog/.env
-            echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> ~/my-blog/.env
-            echo "MYSQL_HOST=db" >> ~/my-blog/.env
-
             cd ~/my-blog
+
+            cat > .env << EOF
+            MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
+            MYSQL_DATABASE=blog
+            MYSQL_USER=bloguser
+            MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
+            MYSQL_HOST=db
+            EOF
+
             docker compose pull
             docker compose up -d
             docker compose ps
