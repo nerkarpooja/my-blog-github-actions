@@ -50,15 +50,11 @@ jobs:
               cd ~/my-blog && git pull origin main
             fi
 
-            if [ ! -f ~/my-blog/.env ]; then
-              cat > ~/my-blog/.env << ENVEOF
-            MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-            MYSQL_DATABASE=blog
-            MYSQL_USER=bloguser
-            MYSQL_PASSWORD=${MYSQL_PASSWORD}
-            MYSQL_HOST=db
-            ENVEOF
-            fi
+            echo "MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}" > ~/my-blog/.env
+            echo "MYSQL_DATABASE=blog" >> ~/my-blog/.env
+            echo "MYSQL_USER=bloguser" >> ~/my-blog/.env
+            echo "MYSQL_PASSWORD=${MYSQL_PASSWORD}" >> ~/my-blog/.env
+            echo "MYSQL_HOST=db" >> ~/my-blog/.env
 
             cd ~/my-blog
             docker compose pull

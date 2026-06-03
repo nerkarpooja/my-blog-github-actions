@@ -13,7 +13,7 @@ services:
       - app
 
   app:
-    image: YOUR_DOCKERHUB_USERNAME/my-blog-app:latest
+    image: poojanerkar/my-blog-app:latest
     volumes:
       - ./app/code:/var/www/html
     networks:
@@ -26,7 +26,7 @@ services:
       - .env
 
   db:
-    image: YOUR_DOCKERHUB_USERNAME/my-blog-db:latest
+    image: poojanerkar/my-blog-db:latest
     env_file:
       - .env
     volumes:
