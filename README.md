@@ -35,30 +35,7 @@ Users can register, login, create blog posts, and delete their own posts.
 
 ## Architecture
 
-```
-Developer Laptop
-      |
-      | git push
-      v
-GitHub (nerkarpooja/my-blog-github-actions)
-      |
-      | triggers workflow
-      v
-GitHub Actions Runner
-      |-- builds poojanerkar/my-blog-app image
-      |-- builds poojanerkar/my-blog-db image
-      |-- pushes both to Docker Hub
-      |
-      | SSH into server
-      v
-AWS EC2 (51.20.193.202) — eu-north-1
-      |
-      |-- git pull (latest code)
-      |-- docker compose pull (latest images)
-      |-- docker compose up -d
-      v
-Blog is live at http://51.20.193.202
-```
+![Architecture Diagram](screenshots/architecture.png)
 
 ### Container Network Isolation
 
